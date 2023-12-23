@@ -1,0 +1,45 @@
+version: "3.8"
+services:
+  amazon_wfirma:
+    container_name: 'postgres_amazon_wfirma'
+    image: postgres:15
+    command: postgres -c "max_connections=10000"
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - amazon_wfirma_network
+    ports:
+      - ${POSTGRES_PORT}:5432
+  pg_web:
+    container_name: 'postgres_amazon_wfirma_web'
+    image: sosedoff/pgweb
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    links:
+      - amazon_wfirma:postgres  # my database container is called postgres, not db
+    env_file:
+      - .env
+    environment:
+      - PGWEB_DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_SERVER}:${POSTGRES_PORT}/${POSTGRES_DB}?sslmode=disable
+    depends_on:
+      - amazon_wfirma # my database container is called postgres, not db
+    networks:
+      - amazon_wfirma_network
+  amazon_wfirma_app:
+    build: .
+    restart: unless-stopped
+    container_name: "amazon_wfirma"
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT}:8787"
+    networks:
+      - amazon_wfirma_network
+    depends_on:
+      - amazon_wfirma
+      - pg_web
+networks:
+  amazon_wfirma_network:
+    external: false
