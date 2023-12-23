@@ -24,7 +24,7 @@ bcrypt = "4.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
-langchain = "^0.0.350"
+langchain = "^0.0.352"
 
 [build-system]
 requires = ["poetry-core"]
